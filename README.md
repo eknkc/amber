@@ -259,20 +259,40 @@ THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## Usage
 
+```go
+var DefaultOptions = Options{true, false}
+```
+
+#### func  Compile
+
+```go
+func Compile(input string, options Options) (*template.Template, error)
+```
+Parses and compiles the supplied amber template string. Returns correspondind Go
+Template (html/templates) instance. Necessary runtime functions will be injected
+and the template will be ready to be executed.
+
+#### func  CompileFile
+
+```go
+func CompileFile(filename string, options Options) (*template.Template, error)
+```
+Parses and compiles the contents of supplied filename. Returns correspondind Go
+Template (html/templates) instance. Necessary runtime functions will be injected
+and the template will be ready to be executed.
+
 #### type Compiler
 
 ```go
 type Compiler struct {
-	// Setting if pretty printing is enabled.
-	// Pretty printing ensures that the output html is properly indented and in human readable form.
-	// If disabled, produced HTML is compact. This might be more suitable in production environments.
-	PrettyPrint bool
+	// Compiler options
+	Options
 }
 ```
 
 Compiler is the main interface of Amber Template Engine. In order to use an
-Amber template, it is required to create a Compiler and compile an Amber
-tempalte source to native Go template.
+Amber template, it is required to create a Compiler and compile an Amber source
+to native Go template.
 
     compiler := amber.New()
     // Parse the input file
@@ -292,22 +312,6 @@ tempalte source to native Go template.
 func New() *Compiler
 ```
 Create and initialize a new Compiler
-
-#### func  NewParsing
-
-```go
-func NewParsing(input string) (*Compiler, error)
-```
-Creates and initializes a new compiler and then parses the supplied amber
-template string. Returns the "ready to compile" Compiler instance or and error
-
-#### func  NewParsingFile
-
-```go
-func NewParsingFile(filename string) (*Compiler, error)
-```
-Creates and initializes a new compiler and then parses the supplied amber
-template file. Returns the "ready to compile" Compiler instance or and error
 
 #### func (*Compiler) Compile
 
@@ -349,3 +353,19 @@ Parse given raw amber tempalte string.
 func (c *Compiler) ParseFile(filename string) (err error)
 ```
 Parse the amber tempalte file in given path
+
+#### type Options
+
+```go
+type Options struct {
+	// Setting if pretty printing is enabled.
+	// Pretty printing ensures that the output html is properly indented and in human readable form.
+	// If disabled, produced HTML is compact. This might be more suitable in production environments.
+	// Defaukt: true
+	PrettyPrint bool
+	// Setting if line number emiting is enabled
+	// In this form, Amber emits line number comments in the output template. It is usable in debugging environments.
+	// Default: false
+	LineNumbers bool
+}
+```
