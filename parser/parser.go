@@ -51,7 +51,14 @@ func (p *Parser) Parse() *Block {
 			if rs, ok := r.(string); ok && rs[:len("Amber Error")] == "Amber Error" {
 				panic(r)
 			}
-			panic(fmt.Sprintf("Amber Error: %v - Line: %d, Column: %d, Length: %d", r, p.scanner.Pos().LineNum, p.scanner.Pos().ColNum, p.scanner.Pos().TokenLength))
+
+			pos := p.pos()
+
+			if len(pos.Filename) > 0 {
+				panic(fmt.Sprintf("Amber Error in <%s>: %v - Line: %d, Column: %d, Length: %d", pos.Filename, r, pos.LineNum, pos.ColNum, pos.TokenLength))
+			} else {
+				panic(fmt.Sprintf("Amber Error: %v - Line: %d, Column: %d, Length: %d", r, pos.LineNum, pos.ColNum, pos.TokenLength))
+			}
 		}
 	}()
 
@@ -100,6 +107,12 @@ func (p *Parser) Parse() *Block {
 
 	p.result = block
 	return block
+}
+
+func (p *Parser) pos() SourcePosition {
+	pos := p.scanner.Pos()
+	pos.Filename = p.filename
+	return pos
 }
 
 func (p *Parser) parseRelativeFile(filename string) *Parser {
@@ -178,6 +191,7 @@ func (p *Parser) parseExtends() *Block {
 func (p *Parser) parseBlock(parent Node) *Block {
 	p.expect(tokIndent)
 	block := newBlock()
+	block.SourcePosition = p.pos()
 
 	for {
 		if p.currenttoken == nil || p.currenttoken.Kind == tokEOF || p.currenttoken.Kind == tokOutdent {
@@ -199,11 +213,11 @@ func (p *Parser) parseBlock(parent Node) *Block {
 
 				switch attr.Kind {
 				case tokId:
-					tag.Attributes = append(tag.Attributes, Attribute{p.scanner.Pos(), "id", attr.Value, true, cond})
+					tag.Attributes = append(tag.Attributes, Attribute{p.pos(), "id", attr.Value, true, cond})
 				case tokClassName:
-					tag.Attributes = append(tag.Attributes, Attribute{p.scanner.Pos(), "class", attr.Value, true, cond})
+					tag.Attributes = append(tag.Attributes, Attribute{p.pos(), "class", attr.Value, true, cond})
 				case tokAttribute:
-					tag.Attributes = append(tag.Attributes, Attribute{p.scanner.Pos(), attr.Value, attr.Data["Content"], attr.Data["Mode"] == "raw", cond})
+					tag.Attributes = append(tag.Attributes, Attribute{p.pos(), attr.Value, attr.Data["Content"], attr.Data["Mode"] == "raw", cond})
 				}
 
 				continue
@@ -223,6 +237,7 @@ func (p *Parser) parseBlock(parent Node) *Block {
 func (p *Parser) parseIf() *Condition {
 	tok := p.expect(tokIf)
 	cnd := newCondition(tok.Value)
+	cnd.SourcePosition = p.pos()
 
 readmore:
 	switch p.currenttoken.Kind {
@@ -248,6 +263,7 @@ readmore:
 func (p *Parser) parseEach() *Each {
 	tok := p.expect(tokEach)
 	ech := newEach(tok.Value)
+	ech.SourcePosition = p.pos()
 	ech.X = tok.Data["X"]
 	ech.Y = tok.Data["Y"]
 
@@ -260,7 +276,9 @@ func (p *Parser) parseEach() *Each {
 
 func (p *Parser) parseImport() *Block {
 	tok := p.expect(tokImport)
-	return p.parseRelativeFile(tok.Value).Parse()
+	node := p.parseRelativeFile(tok.Value).Parse()
+	node.SourcePosition = p.pos()
+	return node
 }
 
 func (p *Parser) parseNamedBlock() *Block {
@@ -271,6 +289,8 @@ func (p *Parser) parseNamedBlock() *Block {
 	}
 
 	block := newNamedBlock(tok.Value)
+	block.SourcePosition = p.pos()
+
 	if tok.Data["Modifier"] == "append" {
 		block.Modifier = NamedBlockAppend
 	} else if tok.Data["Modifier"] == "prepend" {
@@ -292,12 +312,15 @@ func (p *Parser) parseNamedBlock() *Block {
 
 func (p *Parser) parseDoctype() *Doctype {
 	tok := p.expect(tokDoctype)
-	return newDoctype(tok.Value)
+	node := newDoctype(tok.Value)
+	node.SourcePosition = p.pos()
+	return node
 }
 
 func (p *Parser) parseComment() *Comment {
 	tok := p.expect(tokComment)
 	cmnt := newComment(tok.Value)
+	cmnt.SourcePosition = p.pos()
 	cmnt.Silent = tok.Data["Mode"] == "silent"
 
 	if p.currenttoken.Kind == tokIndent {
@@ -309,18 +332,22 @@ func (p *Parser) parseComment() *Comment {
 
 func (p *Parser) parseText() *Text {
 	tok := p.expect(tokText)
-	return newText(tok.Value, tok.Data["Mode"] == "raw")
+	node := newText(tok.Value, tok.Data["Mode"] == "raw")
+	node.SourcePosition = p.pos()
+	return node
 }
 
 func (p *Parser) parseAssignment() *Assignment {
 	tok := p.expect(tokAssignment)
-	return newAssignment(p.scanner.Pos(), tok.Data["X"], tok.Value)
+	node := newAssignment(tok.Data["X"], tok.Value)
+	node.SourcePosition = p.pos()
+	return node
 }
 
 func (p *Parser) parseTag() *Tag {
 	tok := p.expect(tokTag)
 	tag := newTag(tok.Value)
-	tag.SourcePosition = p.scanner.Pos()
+	tag.SourcePosition = p.pos()
 
 	ensureBlock := func() {
 		if tag.Block == nil {
@@ -348,21 +375,21 @@ readmore:
 		if len(id.Data["Condition"]) > 0 {
 			panic("Conditional attributes must be placed in a block within a tag.")
 		}
-		tag.Attributes = append(tag.Attributes, Attribute{p.scanner.Pos(), "id", id.Value, true, ""})
+		tag.Attributes = append(tag.Attributes, Attribute{p.pos(), "id", id.Value, true, ""})
 		goto readmore
 	case tokClassName:
 		cls := p.expect(tokClassName)
 		if len(cls.Data["Condition"]) > 0 {
 			panic("Conditional attributes must be placed in a block within a tag.")
 		}
-		tag.Attributes = append(tag.Attributes, Attribute{p.scanner.Pos(), "class", cls.Value, true, ""})
+		tag.Attributes = append(tag.Attributes, Attribute{p.pos(), "class", cls.Value, true, ""})
 		goto readmore
 	case tokAttribute:
 		attr := p.expect(tokAttribute)
 		if len(attr.Data["Condition"]) > 0 {
 			panic("Conditional attributes must be placed in a block within a tag.")
 		}
-		tag.Attributes = append(tag.Attributes, Attribute{p.scanner.Pos(), attr.Value, attr.Data["Content"], attr.Data["Mode"] == "raw", ""})
+		tag.Attributes = append(tag.Attributes, Attribute{p.pos(), attr.Value, attr.Data["Content"], attr.Data["Mode"] == "raw", ""})
 		goto readmore
 	case tokText:
 		ensureBlock()

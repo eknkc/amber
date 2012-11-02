@@ -206,7 +206,14 @@ func (c *Compiler) visit(node parser.Node) {
 			if rs, ok := r.(string); ok && rs[:len("Amber Error")] == "Amber Error" {
 				panic(r)
 			}
-			panic(fmt.Sprintf("Amber Error: %v - Line: %d, Column: %d, Length: %d", r, node.Line(), node.Column(), node.Length()))
+
+			pos := node.Pos()
+
+			if len(pos.Filename) > 0 {
+				panic(fmt.Sprintf("Amber Error in <%s>: %v - Line: %d, Column: %d, Length: %d", pos.Filename, r, pos.LineNum, pos.ColNum, pos.TokenLength))
+			} else {
+				panic(fmt.Sprintf("Amber Error: %v - Line: %d, Column: %d, Length: %d", r, pos.LineNum, pos.ColNum, pos.TokenLength))
+			}
 		}
 	}()
 
@@ -586,7 +593,7 @@ func (c *Compiler) visitExpression(outerexpr ast.Expr) string {
 
 			stack.PushFront(name)
 		default:
-			panic("Unable to parse expression. Unexpected token: " + reflect.TypeOf(expr).Name())
+			panic("Unable to parse expression. Unsupported: " + reflect.TypeOf(expr).String())
 		}
 	}
 

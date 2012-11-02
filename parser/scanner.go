@@ -45,6 +45,8 @@ type scanner struct {
 
 	line          int
 	col           int
+	lastTokenLine int
+	lastTokenCol  int
 	lastTokenSize int
 
 	readRaw bool
@@ -69,11 +71,7 @@ func newScanner(r io.Reader) *scanner {
 }
 
 func (s *scanner) Pos() SourcePosition {
-	sp := SourcePosition{s.line, s.col, s.lastTokenSize}
-	if sp.ColNum > s.lastTokenSize {
-		sp.ColNum -= s.lastTokenSize
-	}
-	return sp
+	return SourcePosition{s.lastTokenLine + 1, s.lastTokenCol + 1, s.lastTokenSize, ""}
 }
 
 func (s *scanner) Next() *token {
@@ -425,9 +423,12 @@ func (s *scanner) consume(runes int) {
 		panic(fmt.Sprintf("Unable to consume %d runes from buffer.", runes))
 	}
 
+	s.lastTokenLine = s.line
+	s.lastTokenCol = s.col
+	s.lastTokenSize = runes
+
 	s.buffer = s.buffer[runes:]
 	s.col += runes
-	s.lastTokenSize = runes
 }
 
 func (s *scanner) ensureBuffer() {

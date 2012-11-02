@@ -26,27 +26,18 @@ var doctypes = map[string]string{
 }
 
 type Node interface {
-	Line() int
-	Column() int
-	Length() int
+	Pos() SourcePosition
 }
 
 type SourcePosition struct {
 	LineNum     int
 	ColNum      int
 	TokenLength int
+	Filename    string
 }
 
-func (h *SourcePosition) Line() int {
-	return h.LineNum
-}
-
-func (h *SourcePosition) Column() int {
-	return h.ColNum
-}
-
-func (h *SourcePosition) Length() int {
-	return h.TokenLength
+func (s *SourcePosition) Pos() SourcePosition {
+	return *s
 }
 
 type Doctype struct {
@@ -225,10 +216,9 @@ type Assignment struct {
 	Expression string
 }
 
-func newAssignment(sp SourcePosition, x, expression string) *Assignment {
+func newAssignment(x, expression string) *Assignment {
 	assgn := new(Assignment)
 	assgn.X = x
-	assgn.SourcePosition = sp
 	assgn.Expression = expression
 	return assgn
 }
