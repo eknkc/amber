@@ -347,7 +347,7 @@ func (s *scanner) scanClassName() *token {
 	return nil
 }
 
-var rgxAttribute = regexp.MustCompile(`^\[([\w\-]+)\s*=\s*(\"([^\"]*)\"|([^\]]+))\](?:\s*\?\s*(.*)$)?`)
+var rgxAttribute = regexp.MustCompile(`^\[([\w\-]+)\s*=\s*(\"([^\"\\]*)\"|([^\]]+))\](?:\s*\?\s*(.*)$)?`)
 
 func (s *scanner) scanAttribute() *token {
 	if sm := rgxAttribute.FindStringSubmatch(s.buffer); len(sm) != 0 {
@@ -407,12 +407,18 @@ func (s *scanner) scanTag() *token {
 	return nil
 }
 
-var rgxText = regexp.MustCompile(`^(\| ?| ?)?(.*)$`)
+var rgxText = regexp.MustCompile(`^(\|)? ?(.*)$`)
 
 func (s *scanner) scanText() *token {
 	if sm := rgxText.FindStringSubmatch(s.buffer); len(sm) != 0 {
 		s.consume(len(sm[0]))
-		return &token{tokText, sm[2], nil}
+
+		mode := "inline"
+		if sm[1] == "|" {
+			mode = "piped"
+		}
+
+		return &token{tokText, sm[2], map[string]string{"Mode": mode}}
 	}
 
 	return nil

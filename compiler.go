@@ -260,6 +260,10 @@ func (c *Compiler) tempvar() string {
 	return "$__amber_" + strconv.Itoa(c.tempvarIndex)
 }
 
+func (c *Compiler) escape(input string) string {
+	return strings.Replace(strings.Replace(input, `\`, `\\`, -1), `"`, `\"`, -1)
+}
+
 func (c *Compiler) visitBlock(block *parser.Block) {
 	for _, node := range block.Children {
 		if _, ok := node.(*parser.Text); !block.CanInline() && ok {
@@ -282,7 +286,7 @@ func (c *Compiler) visitComment(comment *parser.Comment) {
 	c.indent(0, false)
 
 	if comment.Block == nil {
-		c.write(`{{unescaped "<!-- ` + strings.Replace(comment.Value, `"`, `\"`, -1) + ` -->"}}`)
+		c.write(`{{unescaped "<!-- ` + c.escape(comment.Value) + ` -->"}}`)
 	} else {
 		c.write(`<!-- ` + comment.Value)
 		c.visitBlock(comment.Block)

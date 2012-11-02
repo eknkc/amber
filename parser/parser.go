@@ -392,9 +392,11 @@ readmore:
 		tag.Attributes = append(tag.Attributes, Attribute{p.pos(), attr.Value, attr.Data["Content"], attr.Data["Mode"] == "raw", ""})
 		goto readmore
 	case tokText:
-		ensureBlock()
-		tag.Block.pushFront(p.parseText())
-		goto readmore
+		if p.currenttoken.Data["Mode"] != "piped" {
+			ensureBlock()
+			tag.Block.pushFront(p.parseText())
+			goto readmore
+		}
 	}
 
 	return tag
