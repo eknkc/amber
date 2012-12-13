@@ -158,7 +158,7 @@ Again, it is possible to use arithmetic and boolean operators
         if Name == "Ekin" && LastName == "Koc"
             p Hey! I know you..
 
-There is a special syntax for conditional attributes. Only block attribues can have conditions;
+There is a special syntax for conditional attributes. Only block attributes can have conditions;
 
     div
         .hasfriends ? Friends > 0
@@ -212,7 +212,7 @@ gets compiled to
 
 Inheritance
 
-A tamplate can inherit other templates. In order to inherit another template, an `extends` keyword should be used.
+A template can inherit other templates. In order to inherit another template, an `extends` keyword should be used.
 Parent template can define several named blocks and child template can modify the blocks.
 
     master.amber
@@ -236,7 +236,7 @@ Parent template can define several named blocks and child template can modify th
 
         block append meta
             // This will be added after the description meta tag. It is also possible
-            // to prepend someting to an existing block
+            // to prepend something to an existing block
             meta[name="keywords"][content="foo bar"]
 
         block content

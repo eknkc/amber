@@ -71,9 +71,9 @@ type Options struct {
 	// Setting if pretty printing is enabled.
 	// Pretty printing ensures that the output html is properly indented and in human readable form.
 	// If disabled, produced HTML is compact. This might be more suitable in production environments.
-	// Defaukt: true
+	// Default: true
 	PrettyPrint bool
-	// Setting if line number emiting is enabled
+	// Setting if line number emitting is enabled
 	// In this form, Amber emits line number comments in the output template. It is usable in debugging environments.
 	// Default: false
 	LineNumbers bool
@@ -81,7 +81,7 @@ type Options struct {
 
 var DefaultOptions = Options{true, false}
 
-// Parses and compiles the supplied amber template string. Returns correspondind Go Template (html/templates) instance.
+// Parses and compiles the supplied amber template string. Returns corresponding Go Template (html/templates) instance.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func Compile(input string, options Options) (*template.Template, error) {
 	comp := New()
@@ -95,7 +95,7 @@ func Compile(input string, options Options) (*template.Template, error) {
 	return comp.Compile()
 }
 
-// Parses and compiles the contents of supplied filename. Returns correspondind Go Template (html/templates) instance.
+// Parses and compiles the contents of supplied filename. Returns corresponding Go Template (html/templates) instance.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func CompileFile(filename string, options Options) (*template.Template, error) {
 	comp := New()
@@ -109,7 +109,7 @@ func CompileFile(filename string, options Options) (*template.Template, error) {
 	return comp.Compile()
 }
 
-// Parse given raw amber tempalte string.
+// Parse given raw amber template string.
 func (c *Compiler) Parse(input string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -127,7 +127,7 @@ func (c *Compiler) Parse(input string) (err error) {
 	return
 }
 
-// Parse the amber tempalte file in given path
+// Parse the amber template file in given path
 func (c *Compiler) ParseFile(filename string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
