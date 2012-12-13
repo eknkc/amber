@@ -161,7 +161,7 @@ Again, it is possible to use arithmetic and boolean operators
         if Name == "Ekin" && LastName == "Koc"
             p Hey! I know you..
 
-There is a special syntax for conditional attributes. Only block attribues can have conditions;
+There is a special syntax for conditional attributes. Only block attributes can have conditions;
 
     div
         .hasfriends ? Friends > 0
@@ -268,7 +268,7 @@ var DefaultOptions = Options{true, false}
 ```go
 func Compile(input string, options Options) (*template.Template, error)
 ```
-Parses and compiles the supplied amber template string. Returns correspondind Go
+Parses and compiles the supplied amber template string. Returns corresponding Go
 Template (html/templates) instance. Necessary runtime functions will be injected
 and the template will be ready to be executed.
 
@@ -277,7 +277,7 @@ and the template will be ready to be executed.
 ```go
 func CompileFile(filename string, options Options) (*template.Template, error)
 ```
-Parses and compiles the contents of supplied filename. Returns correspondind Go
+Parses and compiles the contents of supplied filename. Returns corresponding Go
 Template (html/templates) instance. Necessary runtime functions will be injected
 and the template will be ready to be executed.
 
@@ -345,7 +345,7 @@ Compile method to obtain a template instance directly.
 ```go
 func (c *Compiler) Parse(input string) (err error)
 ```
-Parse given raw amber tempalte string.
+Parse given raw amber template string.
 
 #### func (*Compiler) ParseFile
 
