@@ -65,6 +65,16 @@ func Test_Attribute(t *testing.T) {
 	}
 }
 
+func Test_EmptyAttribute(t *testing.T) {
+	res, err := run(`div[name]`, nil)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<div name></div>`, t)
+	}
+}
+
 func Test_RawText(t *testing.T) {
 	res, err := run(`html
 						script

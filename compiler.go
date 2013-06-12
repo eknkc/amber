@@ -337,6 +337,8 @@ func (c *Compiler) visitTag(tag *parser.Tag) {
 
 		if !item.IsRaw {
 			attr.value = c.visitInterpolation(item.Value)
+		} else if (item.Value == "") {
+			attr.value = ""
 		} else {
 			attr.value = `{{"` + item.Value + `"}}`
 		}
@@ -373,7 +375,11 @@ func (c *Compiler) visitTag(tag *parser.Tag) {
 			c.write(`{{if ` + value.condition + `}}`)
 		}
 
-		c.write(` ` + name + `="` + value.value + `"`)
+		if value.value == "" {
+			c.write(` ` + name)
+		} else {
+			c.write(` ` + name + `="` + value.value + `"`)
+		}
 
 		if len(value.condition) > 0 {
 			c.write(`{{end}}`)
