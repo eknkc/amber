@@ -347,13 +347,13 @@ func (s *scanner) scanClassName() *token {
 	return nil
 }
 
-var rgxAttribute = regexp.MustCompile(`^\[([\w\-]+)\s*=\s*(\"([^\"\\]*)\"|([^\]]+))\](?:\s*\?\s*(.*)$)?`)
+var rgxAttribute = regexp.MustCompile(`^\[([\w\-]+)\s*(?:=\s*(\"([^\"\\]*)\"|([^\]]+)))?\](?:\s*\?\s*(.*)$)?`)
 
 func (s *scanner) scanAttribute() *token {
 	if sm := rgxAttribute.FindStringSubmatch(s.buffer); len(sm) != 0 {
 		s.consume(len(sm[0]))
 
-		if len(sm[3]) != 0 {
+		if len(sm[3]) != 0 || sm[2] == "" {
 			return &token{tokAttribute, sm[1], map[string]string{"Content": sm[3], "Mode": "raw", "Condition": sm[5]}}
 		}
 
