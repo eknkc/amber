@@ -154,13 +154,18 @@ func (c *Compiler) Compile() (*template.Template, error) {
 
 // Same as Compile but allows to specify a name for the template
 func (c *Compiler) CompileWithName(name string) (*template.Template, error) {
+	return c.CompileWithTemplate(template.New(name))
+}
+
+// Same as Compile but allows to specify a template
+func (c *Compiler) CompileWithTemplate(t *template.Template) (*template.Template, error) {
 	data, err := c.CompileString()
 
 	if err != nil {
 		return nil, err
 	}
 
-	tpl, err := template.New(name).Funcs(funcMap).Parse(data)
+	tpl, err := t.Funcs(funcMap).Parse(data)
 
 	if err != nil {
 		return nil, err
