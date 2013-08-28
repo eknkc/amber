@@ -149,13 +149,18 @@ func (c *Compiler) ParseFile(filename string) (err error) {
 // Compile amber and create a Go Template (html/templates) instance.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func (c *Compiler) Compile() (*template.Template, error) {
+	return c.CompileWithName(filepath.Base(c.filename))
+}
+
+// Same as Compile but allows to specify a name for the template
+func (c *Compiler) CompileWithName(name string) (*template.Template, error) {
 	data, err := c.CompileString()
 
 	if err != nil {
 		return nil, err
 	}
 
-	tpl, err := template.New(filepath.Base(c.filename)).Funcs(funcMap).Parse(data)
+	tpl, err := template.New(name).Funcs(funcMap).Parse(data)
 
 	if err != nil {
 		return nil, err
@@ -337,7 +342,7 @@ func (c *Compiler) visitTag(tag *parser.Tag) {
 
 		if !item.IsRaw {
 			attr.value = c.visitInterpolation(item.Value)
-		} else if (item.Value == "") {
+		} else if item.Value == "" {
 			attr.value = ""
 		} else {
 			attr.value = `{{"` + item.Value + `"}}`
