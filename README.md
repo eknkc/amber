@@ -192,9 +192,9 @@ It is also possible to iterate over values and indexes at the same time
             .even ? $i % 2 == 0
             .odd ? $i % 2 == 1
 
-### Includes
+### imports
 
-A template can include other templates using `include`:
+A template can import other templates using `import`:
 
     a.amber
         p this is template a
@@ -204,8 +204,8 @@ A template can include other templates using `include`:
 
     c.amber
         div
-            include a
-            include b
+            import a
+            import b
 
 gets compiled to
 
