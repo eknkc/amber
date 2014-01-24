@@ -449,7 +449,12 @@ func (s *scanner) ensureBuffer() {
 	} else if err != nil && len(buf) == 0 {
 		s.state = scnEOF
 	} else {
+		// endline "LF only" or "\n" use Unix, Linux, modern MacOS X, FreeBSD, BeOS, RISC OS
 		if buf[len(buf)-1] == '\n' {
+			buf = buf[:len(buf)-1]
+		}
+		// endline "CR+LF" or "\r\n" use internet protocols, DEC RT-11, Windows, CP/M, MS-DOS, OS/2, Symbian OS
+		if buf[len(buf)-1] == '\r' {
 			buf = buf[:len(buf)-1]
 		}
 
