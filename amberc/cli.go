@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	amber "github.com/eknkc/amber"
+	amber "github.com/rzab/amber"
 	"os"
 )
 

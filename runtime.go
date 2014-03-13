@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-var funcMap = template.FuncMap{
+var FuncMap = template.FuncMap{
 	"__amber_add":   runtime_add,
 	"__amber_sub":   runtime_sub,
 	"__amber_mul":   runtime_mul,
