@@ -5,7 +5,7 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
-	"github.com/rzab/amber/parser"
+	"github.com/eknkc/amber/parser"
 	"go/ast"
 	gp "go/parser"
 	gt "go/token"
