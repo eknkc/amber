@@ -286,7 +286,7 @@ and the template will be ready to be executed.
 ```go
 func CompileDir(dirname string, dopt DirOptions, opt Options) (map[string]*template.Template, error)
 ```
-Parses and compiles the contents of a supplied directory name. Returns a mapping of template name (extension stripped) to corresponding Go Template (html/template instance. Necessary runtime functions will be injected and the template will be ready to be executed.
+Parses and compiles the contents of a supplied directory name. Returns a mapping of template name (extension stripped) to corresponding Go Template (html/template) instance. Necessary runtime functions will be injected and the template will be ready to be executed.
 
 If there are templates in subdirectories, its key in the map will be it's path relative to `dirname`. For example:
 ```
@@ -373,7 +373,7 @@ Parse given raw amber template string.
 ```go
 func (c *Compiler) ParseFile(filename string) (err error)
 ```
-Parse the amber tempalte file in given path
+Parse the amber template file in given path
 
 #### type Options
 
