@@ -132,6 +132,50 @@ func Test_FuncCall(t *testing.T) {
 	}
 }
 
+func Test_CompileDir(t *testing.T) {
+	tmpl, err := CompileDir("samples/", DefaultDirOptions, DefaultOptions)
+
+	// Test Compilation
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// Make sure files are added to map correctly
+	val1, ok := tmpl["basic"]
+	if ok != true || val1 == nil {
+		t.Fatal("CompileDir, template not found.")
+	}
+	val2, ok := tmpl["inherit"]
+	if ok != true || val2 == nil {
+		t.Fatal("CompileDir, template not found.")
+	}
+	val3, ok := tmpl["compiledir_test/basic"]
+	if ok != true || val3 == nil {
+		t.Fatal("CompileDir, template not found.")
+	}
+	val4, ok := tmpl["compiledir_test/compiledir_test/basic"]
+	if ok != true || val4 == nil {
+		t.Fatal("CompileDir, template not found.")
+	}
+
+	// Make sure file parsing is the same
+	var doc1, doc2 bytes.Buffer
+	val1.Execute(&doc1, nil)
+	val4.Execute(&doc2, nil)
+	expect(doc1.String(), doc2.String(), t)
+
+	// Check against CompileFile
+	compilefile, err := CompileFile("samples/basic.amber", DefaultOptions)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	var doc3 bytes.Buffer
+	compilefile.Execute(&doc3, nil)
+	expect(doc1.String(), doc3.String(), t)
+	expect(doc2.String(), doc3.String(), t)
+
+}
+
 func Benchmark_Parse(b *testing.B) {
 	code := `
 	!!! 5
