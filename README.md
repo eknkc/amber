@@ -261,6 +261,7 @@ THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ```go
 var DefaultOptions = Options{true, false}
+var DefaultDirOptions = DirOptions{".amber", true}
 ```
 
 #### func  Compile
@@ -280,6 +281,26 @@ func CompileFile(filename string, options Options) (*template.Template, error)
 Parses and compiles the contents of supplied filename. Returns corresponding Go
 Template (html/templates) instance. Necessary runtime functions will be injected
 and the template will be ready to be executed.
+
+#### func  CompileDir
+```go
+func CompileDir(dirname string, dopt DirOptions, opt Options) (map[string]*template.Template, error)
+```
+Parses and compiles the contents of a supplied directory name. Returns a mapping of template name (extension stripped) to corresponding Go Template (html/template) instance. Necessary runtime functions will be injected and the template will be ready to be executed.
+
+If there are templates in subdirectories, its key in the map will be it's path relative to `dirname`. For example:
+```
+templates/
+   |-- index.amber
+   |-- layouts/
+         |-- base.amber
+```
+```go
+templates, err := amber.CompileDir("templates/", amber.DefaultDirOptions, amber.DefaultOptions)
+templates["index"] // index.amber Go Template
+templates["layouts/base"] // base.amber Go Template
+```
+By default, the search will be recursive and will match only files ending in ".amber". If recursive is turned off, it will only search the top level of the directory. Specified extension must start with a period.
 
 #### type Compiler
 
@@ -352,7 +373,7 @@ Parse given raw amber template string.
 ```go
 func (c *Compiler) ParseFile(filename string) (err error)
 ```
-Parse the amber tempalte file in given path
+Parse the amber template file in given path
 
 #### type Options
 
@@ -367,5 +388,17 @@ type Options struct {
 	// In this form, Amber emits line number comments in the output template. It is usable in debugging environments.
 	// Default: false
 	LineNumbers bool
+}
+```
+
+#### type DirOptions
+
+```go
+// Used to provide options to directory compilation
+type DirOptions struct {
+	// File extension to match for compilation
+	Ext string
+	// Whether or not to walk subdirectories
+	Recursive bool
 }
 ```
