@@ -11,6 +11,7 @@ import (
 	gt "go/token"
 	"html/template"
 	"io"
+	"os"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -79,7 +80,16 @@ type Options struct {
 	LineNumbers bool
 }
 
+// Used to provide options to directory compilation
+type DirOptions struct {
+	// File extension to match for compilation
+	Ext string
+	// Whether or not to walk subdirectories
+	Recursive bool
+}
+
 var DefaultOptions = Options{true, false}
+var DefaultDirOptions = DirOptions{".amber", true}
 
 // Parses and compiles the supplied amber template string. Returns corresponding Go Template (html/templates) instance.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
@@ -107,6 +117,58 @@ func CompileFile(filename string, options Options) (*template.Template, error) {
 	}
 
 	return comp.Compile()
+}
+
+// Parses and compiles the contents of a supplied directory path, with options.
+// Returns a map of a template identifier (key) to a Go Template instance.
+// Ex: if the dirname="templates/" had a file "index.amber" the key would be "index"
+// If option for recursive is True, this parses every file of relevant extension
+// in all subdirectories. The key then is the path e.g: "layouts/layout"
+func CompileDir(dirname string, dopt DirOptions, opt Options) (map[string]*template.Template, error) {
+	dir, err := os.Open(dirname)
+	if err != nil {
+		return nil, err
+	}
+	defer dir.Close()
+
+	files, err := dir.Readdir(0)
+	if err != nil {
+		return nil, err
+	}
+
+	compiled := make(map[string]*template.Template)
+	for _, file := range files {
+		// filename is for example "index.amber"
+		filename := file.Name()
+		fileext := filepath.Ext(filename)
+
+		// If recursive is true and there's a subdirectory, recurse
+		if dopt.Recursive && file.IsDir() {
+			dirpath := filepath.Join(dirname, filename)
+			subcompiled, err := CompileDir(dirpath, dopt, opt)
+			if err != nil {
+				return nil, err
+			}
+			// Copy templates from subdirectory into parent template mapping
+			for k, v := range subcompiled {
+				// Concat with parent directory name for unique paths
+				key := filepath.Join(filename, k)
+				compiled[key] = v
+			}
+		} else if fileext == dopt.Ext {
+			// Otherwise compile the file and add to mapping
+			fullpath := filepath.Join(dirname, filename)
+			tmpl, err := CompileFile(fullpath, opt)
+			if err != nil {
+				return nil, err
+			}
+			// Strip extension
+			key := filename[0:len(filename)-len(fileext)]
+			compiled[key] = tmpl
+		}
+	}
+
+	return compiled, nil
 }
 
 // Parse given raw amber template string.
