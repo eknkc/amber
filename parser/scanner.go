@@ -270,7 +270,7 @@ func (s *scanner) scanDoctype() *token {
 	return nil
 }
 
-var rgxIf = regexp.MustCompile(`^if\s*(.+)$`)
+var rgxIf = regexp.MustCompile(`^if\s+(.+)$`)
 var rgxElse = regexp.MustCompile(`^else\s*`)
 
 func (s *scanner) scanCondition() *token {
