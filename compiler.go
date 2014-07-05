@@ -227,7 +227,7 @@ func (c *Compiler) CompileWithTemplate(t *template.Template) (*template.Template
 		return nil, err
 	}
 
-	tpl, err := t.Funcs(funcMap).Parse(data)
+	tpl, err := t.Funcs(FuncMap).Parse(data)
 
 	if err != nil {
 		return nil, err
