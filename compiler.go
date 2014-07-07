@@ -55,6 +55,7 @@ type Compiler struct {
 	newline      bool
 	buffer       *bytes.Buffer
 	tempvarIndex int
+	mixins       map[string]*parser.Mixin
 }
 
 // Create and initialize a new Compiler
@@ -64,6 +65,7 @@ func New() *Compiler {
 	compiler.tempvarIndex = 0
 	compiler.PrettyPrint = true
 	compiler.Options = DefaultOptions
+	compiler.mixins = make(map[string]*parser.Mixin)
 
 	return compiler
 }
@@ -163,7 +165,7 @@ func CompileDir(dirname string, dopt DirOptions, opt Options) (map[string]*templ
 				return nil, err
 			}
 			// Strip extension
-			key := filename[0:len(filename)-len(fileext)]
+			key := filename[0 : len(filename)-len(fileext)]
 			compiled[key] = tmpl
 		}
 	}
@@ -306,6 +308,10 @@ func (c *Compiler) visit(node parser.Node) {
 		c.visitEach(node.(*parser.Each))
 	case *parser.Assignment:
 		c.visitAssignment(node.(*parser.Assignment))
+	case *parser.Mixin:
+		c.visitMixin(node.(*parser.Mixin))
+	case *parser.MixinCall:
+		c.visitMixinCall(node.(*parser.MixinCall))
 	}
 }
 
@@ -681,4 +687,16 @@ func (c *Compiler) visitExpression(outerexpr ast.Expr) string {
 
 	exec(outerexpr)
 	return pop()
+}
+
+func (c *Compiler) visitMixin(mixin *parser.Mixin) {
+	c.mixins[mixin.Name] = mixin
+}
+
+func (c *Compiler) visitMixinCall(mixinCall *parser.MixinCall) {
+	mixin := c.mixins[mixinCall.Name]
+	for i, arg := range mixin.Args {
+		c.write(fmt.Sprintf(`{{%s := %s}}`, arg, c.visitRawInterpolation(mixinCall.Args[i])))
+	}
+	c.visitBlock(mixin.Block)
 }

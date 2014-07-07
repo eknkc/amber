@@ -27,6 +27,8 @@ const (
 	tokImport
 	tokNamedBlock
 	tokExtends
+	tokMixin
+	tokMixinCall
 )
 
 const (
@@ -105,6 +107,14 @@ func (s *scanner) Next() *token {
 
 		return s.Next()
 	case scnLine:
+		if tok := s.scanMixin(); tok != nil {
+			return tok
+		}
+
+		if tok := s.scanMixinCall(); tok != nil {
+			return tok
+		}
+
 		if tok := s.scanDoctype(); tok != nil {
 			return tok
 		}
@@ -402,6 +412,28 @@ func (s *scanner) scanTag() *token {
 	if sm := rgxTag.FindStringSubmatch(s.buffer); len(sm) != 0 {
 		s.consume(len(sm[0]))
 		return &token{tokTag, sm[1], nil}
+	}
+
+	return nil
+}
+
+var rgxMixin = regexp.MustCompile(`^mixin ([a-zA-Z_]+\w*)(\(((\$\w*(,\s)?)*)\))?$`)
+
+func (s *scanner) scanMixin() *token {
+	if sm := rgxMixin.FindStringSubmatch(s.buffer); len(sm) != 0 {
+		s.consume(len(sm[0]))
+		return &token{tokMixin, sm[1], map[string]string{"Args": sm[3]}}
+	}
+
+	return nil
+}
+
+var rgxMixinCall = regexp.MustCompile(`^\+([A-Za-z_]+\w*)(\((.+(,\s)?)*\))?$`)
+
+func (s *scanner) scanMixinCall() *token {
+	if sm := rgxMixinCall.FindStringSubmatch(s.buffer); len(sm) != 0 {
+		s.consume(len(sm[0]))
+		return &token{tokMixinCall, sm[1], map[string]string{"Args": sm[3]}}
 	}
 
 	return nil

@@ -1,5 +1,8 @@
 package parser
 
+import "regexp"
+import "strings"
+
 var selfClosingTags = [...]string{
 	"meta",
 	"img",
@@ -221,4 +224,58 @@ func newAssignment(x, expression string) *Assignment {
 	assgn.X = x
 	assgn.Expression = expression
 	return assgn
+}
+
+type Mixin struct {
+	SourcePosition
+	Block *Block
+	Name  string
+	Args  []string
+}
+
+func newMixin(name, args string) *Mixin {
+	mixin := new(Mixin)
+	mixin.Name = name
+
+	delExp := regexp.MustCompile(`,\s`)
+	mixin.Args = delExp.Split(args, -1)
+
+	for i := 0; i < len(mixin.Args); i++ {
+		mixin.Args[i] = strings.TrimSpace(mixin.Args[i])
+		if mixin.Args[i] == "" {
+			mixin.Args = append(mixin.Args[:i], mixin.Args[i+1:]...)
+			i--
+		}
+	}
+
+	return mixin
+}
+
+type MixinCall struct {
+	SourcePosition
+	Name string
+	Args []string
+}
+
+func newMixinCall(name, args string) *MixinCall {
+	mixinCall := new(MixinCall)
+	mixinCall.Name = name
+
+	const t = "%s"
+	quoteExp := regexp.MustCompile(`"(.*?)"`)
+	delExp := regexp.MustCompile(`,\s`)
+
+	quotes := quoteExp.FindAllString(args, -1)
+	replaced := quoteExp.ReplaceAllString(args, t)
+	mixinCall.Args = delExp.Split(replaced, -1)
+
+	qi := 0
+	for i, arg := range mixinCall.Args {
+		if arg == t {
+			mixinCall.Args[i] = quotes[qi]
+			qi++
+		}
+	}
+
+	return mixinCall
 }
