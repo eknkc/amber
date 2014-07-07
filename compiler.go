@@ -165,7 +165,7 @@ func CompileDir(dirname string, dopt DirOptions, opt Options) (map[string]*templ
 				return nil, err
 			}
 			// Strip extension
-			key := filename[0:len(filename)-len(fileext)]
+			key := filename[0 : len(filename)-len(fileext)]
 			compiled[key] = tmpl
 		}
 	}

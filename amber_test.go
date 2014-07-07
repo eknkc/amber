@@ -29,6 +29,48 @@ func Test_Nesting(t *testing.T) {
 	}
 }
 
+func Test_Mixin(t *testing.T) {
+	res, err := run(`
+		mixin a($a)
+			p #{$a}
+
+		+a(1)`, nil)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<p>1</p>`, t)
+	}
+}
+
+func Test_Mixin_NoArguments(t *testing.T) {
+	res, err := run(`
+		mixin a()
+			p Testing
+
+		+a()`, nil)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<p>Testing</p>`, t)
+	}
+}
+
+func Test_Mixin_MultiArguments(t *testing.T) {
+	res, err := run(`
+		mixin a($a, $b, $c, $d)
+			p #{$a} #{$b} #{$c} #{$d}
+
+		+a("a", "b", "c", A)`, map[string]int{"A": 2})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<p>a b c 2</p>`, t)
+	}
+}
+
 func Test_ClassName(t *testing.T) {
 	res, err := run(`div.test
 						p.test1.test2

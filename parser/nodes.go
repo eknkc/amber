@@ -1,6 +1,7 @@
 package parser
 
 import "regexp"
+import "strings"
 
 var selfClosingTags = [...]string{
 	"meta",
@@ -238,6 +239,14 @@ func newMixin(name, args string) *Mixin {
 
 	delExp := regexp.MustCompile(`,\s`)
 	mixin.Args = delExp.Split(args, -1)
+
+	for i := 0; i < len(mixin.Args); i++ {
+		mixin.Args[i] = strings.TrimSpace(mixin.Args[i])
+		if mixin.Args[i] == "" {
+			mixin.Args = append(mixin.Args[:i], mixin.Args[i+1:]...)
+			i--
+		}
+	}
 
 	return mixin
 }
