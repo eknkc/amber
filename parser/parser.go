@@ -158,6 +158,10 @@ func (p *Parser) parse() Node {
 		return p.parseExtends()
 	case tokIndent:
 		return p.parseBlock(nil)
+	case tokMixin:
+		return p.parseMixin()
+	case tokMixinCall:
+		return p.parseMixinCall()
 	}
 
 	panic(fmt.Sprintf("Unexpected token: %d", p.currenttoken.Kind))
@@ -400,4 +404,23 @@ readmore:
 	}
 
 	return tag
+}
+
+func (p *Parser) parseMixin() *Mixin {
+	tok := p.expect(tokMixin)
+	mixin := newMixin(tok.Value, tok.Data["Args"])
+	mixin.SourcePosition = p.pos()
+
+	if p.currenttoken.Kind == tokIndent {
+		mixin.Block = p.parseBlock(mixin)
+	}
+
+	return mixin
+}
+
+func (p *Parser) parseMixinCall() *MixinCall {
+	tok := p.expect(tokMixinCall)
+	mixinCall := newMixinCall(tok.Value, tok.Data["Args"])
+	mixinCall.SourcePosition = p.pos()
+	return mixinCall
 }
