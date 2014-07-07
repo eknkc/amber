@@ -215,7 +215,7 @@ gets compiled to
 
 ### Inheritance
 
-A tamplate can inherit other templates. In order to inherit another template, an `extends` keyword should be used.
+A template can inherit other templates. In order to inherit another template, an `extends` keyword should be used.
 Parent template can define several named blocks and child template can modify the blocks.
 
     master.amber
