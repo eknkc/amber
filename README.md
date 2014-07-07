@@ -192,7 +192,27 @@ It is also possible to iterate over values and indexes at the same time
             .even ? $i % 2 == 0
             .odd ? $i % 2 == 1
 
-### imports
+### Mixins
+
+Mixins (reusable template blocks that accept arguments) can be defined:
+
+    mixin surprise
+        span Surprise!
+    mixin link($href, $title, $text)
+        a[href=$href][title=$title] #{$text}
+        
+and then called multiple times within a template (or even within another mixin definition):
+
+    div
+    	+surprise
+    	+surprise
+        +link("http://google.com", "Google", "Check out Google")
+        
+Template data, variables, expressions, etc., can all be passed as arguments:
+
+    +link(GoogleUrl, $googleTitle, "Check out " + $googleTitle)
+
+### Imports
 
 A template can import other templates using `import`:
 
