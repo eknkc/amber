@@ -668,8 +668,13 @@ func (c *Compiler) visitExpression(outerexpr ast.Expr) string {
 				stack.PushFront(ce.Fun.(*ast.Ident).Name)
 				c.write(`{{` + name + ` := ` + pop())
 			} else {
-				exec(ce.Fun)
-				c.write(`{{` + name + ` := call ` + pop())
+				switch ce.Fun.(type) {
+				case *ast.Ident:
+					stack.PushFront(ce.Fun.(*ast.Ident).Name)
+				default:
+					exec(ce.Fun)
+				}
+				c.write(`{{` + name + ` := ` + pop())
 			}
 
 			for i := 0; i < len(ce.Args); i++ {
