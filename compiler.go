@@ -418,7 +418,7 @@ func (c *Compiler) visitTag(tag *parser.Tag) {
 		} else if item.Value == "" {
 			attr.value = ""
 		} else {
-			attr.value = `{{"` + item.Value + `"}}`
+			attr.value = item.Value
 		}
 
 		if len(item.Condition) != 0 {
