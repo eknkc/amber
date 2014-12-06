@@ -98,12 +98,12 @@ func Test_Id(t *testing.T) {
 func Test_Attribute(t *testing.T) {
 	res, err := run(`div[name="Test"]
 						p
-							[style="text-align: center"]`, nil)
+							[style="text-align: center; color: maroon"]`, nil)
 
 	if err != nil {
 		t.Fatal(err.Error())
 	} else {
-		expect(res, `<div name="Test"><p style="text-align: center"></p></div>`, t)
+		expect(res, `<div name="Test"><p style="text-align: center; color: maroon"></p></div>`, t)
 	}
 }
 
