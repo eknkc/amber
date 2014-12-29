@@ -1,6 +1,6 @@
 /*
-Amber is an elegant templating engine for Go Programming Language
-It is inspired from HAML and Jade
+Package amber is an elegant templating engine for Go Programming Language.
+It is inspired from HAML and Jade.
 
 Tags
 
