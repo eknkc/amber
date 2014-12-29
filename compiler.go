@@ -107,6 +107,12 @@ func Compile(input string, options Options) (*template.Template, error) {
 	return comp.Compile()
 }
 
+// MustCompile is the same as Compile, except the input is assumed error free.
+func MustCompile(input string, options Options) *template.Template {
+	t, _ := Compile(input, options)
+	return t
+}
+
 // Parses and compiles the contents of supplied filename. Returns corresponding Go Template (html/templates) instance.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func CompileFile(filename string, options Options) (*template.Template, error) {
@@ -119,6 +125,12 @@ func CompileFile(filename string, options Options) (*template.Template, error) {
 	}
 
 	return comp.Compile()
+}
+
+// MustCompileFile is the same as CompileFile, except the input is assumed error free.
+func MustCompileFile(filename string, options Options) *template.Template {
+	t, _ := CompileFile(filename, options)
+	return t
 }
 
 // Parses and compiles the contents of a supplied directory path, with options.
@@ -171,6 +183,12 @@ func CompileDir(dirname string, dopt DirOptions, opt Options) (map[string]*templ
 	}
 
 	return compiled, nil
+}
+
+// MustCompileDir is the same as CompileDir, except input is assumed error free.
+func MustCompileDir(dirname string, dopt DirOptions, opt Options) map[string]*template.Template {
+	m, _ := CompileDir(dirname, dopt, opt)
+	return m
 }
 
 // Parse given raw amber template string.
