@@ -58,7 +58,7 @@ type Compiler struct {
 	mixins       map[string]*parser.Mixin
 }
 
-// Create and initialize a new Compiler
+// New creates and initialize a new Compiler.
 func New() *Compiler {
 	compiler := new(Compiler)
 	compiler.filename = ""
@@ -70,6 +70,7 @@ func New() *Compiler {
 	return compiler
 }
 
+// Options defines template output behavior.
 type Options struct {
 	// Setting if pretty printing is enabled.
 	// Pretty printing ensures that the output html is properly indented and in human readable form.
@@ -82,7 +83,7 @@ type Options struct {
 	LineNumbers bool
 }
 
-// Used to provide options to directory compilation
+// DirOptions is used to provide options to directory compilation.
 type DirOptions struct {
 	// File extension to match for compilation
 	Ext string
@@ -90,10 +91,13 @@ type DirOptions struct {
 	Recursive bool
 }
 
+// DefaultOptions sets pretty-printing to true and line numbering to false.
 var DefaultOptions = Options{true, false}
+
+// DefaultDirOptions sets expected file extension to ".amber" and recursive search for templates within a directory to true.
 var DefaultDirOptions = DirOptions{".amber", true}
 
-// Parses and compiles the supplied amber template string. Returns corresponding Go Template (html/templates) instance.
+// Compile parses and compiles the supplied amber template string. Returns corresponding Go Template (html/templates) instance.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func Compile(input string, options Options) (*template.Template, error) {
 	comp := New()
@@ -107,13 +111,16 @@ func Compile(input string, options Options) (*template.Template, error) {
 	return comp.Compile()
 }
 
-// MustCompile is the same as Compile, except the input is assumed error free.
+// MustCompile is the same as Compile, except the input is assumed error free. If else, panic.
 func MustCompile(input string, options Options) *template.Template {
-	t, _ := Compile(input, options)
+	t, err := Compile(input, options)
+	if err != nil {
+		panic(err)
+	}
 	return t
 }
 
-// Parses and compiles the contents of supplied filename. Returns corresponding Go Template (html/templates) instance.
+// CompileFile parses and compiles the contents of supplied filename. Returns corresponding Go Template (html/templates) instance.
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func CompileFile(filename string, options Options) (*template.Template, error) {
 	comp := New()
@@ -127,13 +134,16 @@ func CompileFile(filename string, options Options) (*template.Template, error) {
 	return comp.Compile()
 }
 
-// MustCompileFile is the same as CompileFile, except the input is assumed error free.
+// MustCompileFile is the same as CompileFile, except the input is assumed error free. If else, panic.
 func MustCompileFile(filename string, options Options) *template.Template {
-	t, _ := CompileFile(filename, options)
+	t, err := CompileFile(filename, options)
+	if err != nil {
+		panic(err)
+	}
 	return t
 }
 
-// Parses and compiles the contents of a supplied directory path, with options.
+// CompileDir parses and compiles the contents of a supplied directory path, with options.
 // Returns a map of a template identifier (key) to a Go Template instance.
 // Ex: if the dirname="templates/" had a file "index.amber" the key would be "index"
 // If option for recursive is True, this parses every file of relevant extension
@@ -185,9 +195,12 @@ func CompileDir(dirname string, dopt DirOptions, opt Options) (map[string]*templ
 	return compiled, nil
 }
 
-// MustCompileDir is the same as CompileDir, except input is assumed error free.
+// MustCompileDir is the same as CompileDir, except input is assumed error free. If else, panic.
 func MustCompileDir(dirname string, dopt DirOptions, opt Options) map[string]*template.Template {
-	m, _ := CompileDir(dirname, dopt, opt)
+	m, err := CompileDir(dirname, dopt, opt)
+	if err != nil {
+		panic(err)
+	}
 	return m
 }
 
@@ -209,7 +222,7 @@ func (c *Compiler) Parse(input string) (err error) {
 	return
 }
 
-// Parse the amber template file in given path
+// ParseFile parses the amber template file in given path.
 func (c *Compiler) ParseFile(filename string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -234,12 +247,12 @@ func (c *Compiler) Compile() (*template.Template, error) {
 	return c.CompileWithName(filepath.Base(c.filename))
 }
 
-// Same as Compile but allows to specify a name for the template
+// CompileWithName is the same as Compile, but allows to specify a name for the template.
 func (c *Compiler) CompileWithName(name string) (*template.Template, error) {
 	return c.CompileWithTemplate(template.New(name))
 }
 
-// Same as Compile but allows to specify a template
+// CompileWithTemplate is the same as Compile but allows to specify a template.
 func (c *Compiler) CompileWithTemplate(t *template.Template) (*template.Template, error) {
 	data, err := c.CompileString()
 
@@ -256,7 +269,7 @@ func (c *Compiler) CompileWithTemplate(t *template.Template) (*template.Template
 	return tpl, nil
 }
 
-// Compile amber and write the Go Template source into given io.Writer instance
+// CompileWriter compiles amber and writes the Go Template source into given io.Writer instance.
 // You would not be using this unless debugging / checking the output. Please use Compile
 // method to obtain a template instance directly.
 func (c *Compiler) CompileWriter(out io.Writer) (err error) {
@@ -277,7 +290,7 @@ func (c *Compiler) CompileWriter(out io.Writer) (err error) {
 	return
 }
 
-// Compile template and return the Go Template source
+// CompileString compiles the template and returns the Go Template source.
 // You would not be using this unless debugging / checking the output. Please use Compile
 // method to obtain a template instance directly.
 func (c *Compiler) CompileString() (string, error) {
