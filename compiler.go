@@ -111,6 +111,21 @@ func Compile(input string, options Options) (*template.Template, error) {
 	return comp.Compile()
 }
 
+// Compile parses and compiles the supplied amber template []byte.
+// Returns corresponding Go Template (html/templates) instance.
+// Necessary runtime functions will be injected and the template will be ready to be executed.
+func CompileData(input []byte, filename string, options Options) (*template.Template, error) {
+	comp := New()
+	comp.Options = options
+
+	err := comp.ParseData(input, filename)
+	if err != nil {
+		return nil, err
+	}
+
+	return comp.Compile()
+}
+
 // MustCompile is the same as Compile, except the input is assumed error free. If else, panic.
 func MustCompile(input string, options Options) *template.Template {
 	t, err := Compile(input, options)
@@ -213,6 +228,25 @@ func (c *Compiler) Parse(input string) (err error) {
 	}()
 
 	parser, err := parser.StringParser(input)
+
+	if err != nil {
+		return
+	}
+
+	c.node = parser.Parse()
+	return
+}
+
+// Parse given raw amber template bytes, and the filename that belongs with it
+func (c *Compiler) ParseData(input []byte, filename string) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New(r.(string))
+		}
+	}()
+
+	parser, err := parser.ByteParser(input)
+	parser.SetFilename(filename)
 
 	if err != nil {
 		return

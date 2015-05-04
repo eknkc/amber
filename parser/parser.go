@@ -29,6 +29,14 @@ func StringParser(input string) (*Parser, error) {
 	return newParser(bytes.NewReader([]byte(input))), nil
 }
 
+func ByteParser(input []byte) (*Parser, error) {
+	return newParser(bytes.NewReader(input)), nil
+}
+
+func (p *Parser) SetFilename(filename string) {
+	p.filename = filename
+}
+
 func FileParser(filename string) (*Parser, error) {
 	data, err := ioutil.ReadFile(filename)
 
