@@ -174,6 +174,32 @@ func Test_FuncCall(t *testing.T) {
 	}
 }
 
+func Test_Multiple_File_Inheritance(t *testing.T) {
+	tmpl, err := CompileDir("samples/", DefaultDirOptions, DefaultOptions)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	t1a, ok := tmpl["multilevel.inheritance.a"]
+	if ok != true || t1a == nil {
+		t.Fatal("CompileDir, template not found.")
+	}
+
+	t1b, ok := tmpl["multilevel.inheritance.b"]
+	if ok != true || t1b == nil {
+		t.Fatal("CompileDir, template not found.")
+	}
+
+	t1c, ok := tmpl["multilevel.inheritance.c"]
+	if ok != true || t1c == nil {
+		t.Fatal("CompileDir, template not found.")
+	}
+
+	var res bytes.Buffer
+	t1c.Execute(&res, nil)
+	expect(strings.TrimSpace(res.String()), "<p>This is C</p>", t)
+}
+
 func Failing_Test_CompileDir(t *testing.T) {
 	tmpl, err := CompileDir("samples/", DefaultDirOptions, DefaultOptions)
 
