@@ -5,7 +5,6 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
-	"github.com/eknkc/amber/parser"
 	"go/ast"
 	gp "go/parser"
 	gt "go/token"
@@ -17,6 +16,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/eknkc/amber/parser"
 )
 
 var builtinFunctions = [...]string{
@@ -473,6 +474,7 @@ func (c *Compiler) visitTag(tag *parser.Tag) {
 	}
 
 	attribs := make(map[string]*attrib)
+	attrNames := make([]string, 0, 0)
 
 	for _, item := range tag.Attributes {
 		attr := new(attrib)
@@ -506,6 +508,9 @@ func (c *Compiler) visitTag(tag *parser.Tag) {
 
 			prevclass.value = prevclass.value + attr.value
 		} else {
+			if _, ok := attribs[item.Name]; !ok {
+				attrNames = append(attrNames, item.Name)
+			}
 			attribs[item.Name] = attr
 		}
 	}
@@ -513,7 +518,8 @@ func (c *Compiler) visitTag(tag *parser.Tag) {
 	c.indent(0, true)
 	c.write("<" + tag.Name)
 
-	for name, value := range attribs {
+	for _, name := range attrNames {
+		value := attribs[name]
 		if len(value.condition) > 0 {
 			c.write(`{{if ` + value.condition + `}}`)
 		}
