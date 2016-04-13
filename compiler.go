@@ -589,6 +589,10 @@ func (c *Compiler) visitInterpolation(value string) string {
 }
 
 func (c *Compiler) visitRawInterpolation(value string) string {
+	if value == "" {
+		value = "\"\""
+	}
+
 	value = strings.Replace(value, "$", "__DOLLAR__", -1)
 	expr, err := gp.ParseExpr(value)
 	if err != nil {
