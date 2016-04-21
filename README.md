@@ -1,5 +1,5 @@
-# amber
---
+# amber [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/eknkc/amber)
+
     import "github.com/eknkc/amber"
 
 Amber is an elegant templating engine for Go Programming Language
