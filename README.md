@@ -1,6 +1,8 @@
 # amber [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](http://godoc.org/github.com/eknkc/amber)
 
-    import "github.com/eknkc/amber"
+```go
+import "github.com/eknkc/amber"
+```
 
 Amber is an elegant templating engine for Go Programming Language
 It is inspired from HAML and Jade
@@ -13,7 +15,9 @@ A tag is simply a word:
 
 is converted to
 
-    <html></html>
+```html
+<html></html>
+```
 
 It is possible to add ID and CLASS attributes to tags:
 
@@ -22,8 +26,10 @@ It is possible to add ID and CLASS attributes to tags:
 
 are converted to
 
-    <div id="main"></div>
-    <span class="time"></span>
+```html
+<div id="main"></div>
+<span class="time"></span>
+```
 
 Any arbitrary attribute name / value pair can be added this way:
 
@@ -35,7 +41,9 @@ You can mix multiple attributes together
 
 gets converted to
 
-    <a id="someid" class="main link" href="/" title="Main Page">Click Link</a>
+```html
+<a id="someid" class="main link" href="/" title="Main Page">Click Link</a>
+```
 
 It is also possible to define these attributes within the block of a tag
 
@@ -89,16 +97,18 @@ For multi line tag text, or nested tags, use indentation:
 Input template data can be reached by key names directly. For example, assuming the template has been
 executed with following JSON data:
 
-    {
-        "Name": "Ekin",
-        "LastName": "Koc",
-        "Repositories": [
-            "amber",
-            "dateformat"
-        ],
-        "Avatar": "/images/ekin.jpg",
-        "Friends": 17
-    }
+```json
+{
+  "Name": "Ekin",
+  "LastName": "Koc",
+  "Repositories": [
+    "amber",
+    "dateformat"
+  ],
+  "Avatar": "/images/ekin.jpg",
+  "Friends": 17
+}
+```
 
 It is possible to interpolate fields using `#{}`
 
@@ -106,7 +116,9 @@ It is possible to interpolate fields using `#{}`
 
 would print
 
-    <p>Welcome Ekin!</p>
+```html
+<p>Welcome Ekin!</p>
+```
 
 Attributes can have field names as well
 
@@ -114,7 +126,9 @@ Attributes can have field names as well
 
 would print
 
-    <a title="Ekin" href="/ekin.koc"></a>
+```html
+<a title="Ekin" href="/ekin.koc"></a>
+```
 
 ### Expressions
 
