@@ -418,7 +418,7 @@ func (s *scanner) scanTag() *token {
 	return nil
 }
 
-var rgxMixin = regexp.MustCompile(`^mixin ([a-zA-Z_]+\w*)(\(((\$\w*(,\s)?)*)\))?$`)
+var rgxMixin = regexp.MustCompile(`^mixin ([a-zA-Z_-]+\w*)(\(((\$\w*(,\s)?)*)\))?$`)
 
 func (s *scanner) scanMixin() *token {
 	if sm := rgxMixin.FindStringSubmatch(s.buffer); len(sm) != 0 {
@@ -429,7 +429,7 @@ func (s *scanner) scanMixin() *token {
 	return nil
 }
 
-var rgxMixinCall = regexp.MustCompile(`^\+([A-Za-z_]+\w*)(\((.+(,\s)?)*\))?$`)
+var rgxMixinCall = regexp.MustCompile(`^\+([A-Za-z_-]+\w*)(\((.+(,\s)?)*\))?$`)
 
 func (s *scanner) scanMixinCall() *token {
 	if sm := rgxMixinCall.FindStringSubmatch(s.buffer); len(sm) != 0 {
