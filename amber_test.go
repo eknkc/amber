@@ -232,6 +232,22 @@ func Test_Multiple_File_Inheritance(t *testing.T) {
 	expect(strings.TrimSpace(res.String()), "<p>This is C</p>", t)
 }
 
+func Test_Recursion_In_Blocks(t *testing.T) {
+	tmpl, err := CompileDir("samples/", DefaultDirOptions, DefaultOptions)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	top, ok := tmpl["recursion.top"]
+	if !ok || top == nil {
+		t.Fatal("template not found.")
+	}
+
+	var res bytes.Buffer
+	top.Execute(&res, nil)
+	expect(strings.TrimSpace(res.String()), "content", t)
+}
+
 func Failing_Test_CompileDir(t *testing.T) {
 	tmpl, err := CompileDir("samples/", DefaultDirOptions, DefaultOptions)
 
