@@ -71,6 +71,20 @@ func Test_Mixin_MultiArguments(t *testing.T) {
 	}
 }
 
+func Test_Mixin_NameWithDashes(t *testing.T) {
+	res, err := run(`
+		mixin i-am-mixin($a, $b, $c, $d)
+			p #{$a} #{$b} #{$c} #{$d}
+
+		+i-am-mixin("a", "b", "c", A)`, map[string]int{"A": 2})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<p>a b c 2</p>`, t)
+	}
+}
+
 func Test_ClassName(t *testing.T) {
 	res, err := run(`div.test
 						p.test1.test2
