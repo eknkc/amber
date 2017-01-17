@@ -363,7 +363,7 @@ func expect(cur, expected string, t *testing.T) {
 }
 
 func run(tpl string, data interface{}) (string, error) {
-	t, err := Compile(tpl, Options{false, false})
+	t, err := Compile(tpl, Options{false, false, nil})
 	if err != nil {
 		return "", err
 	}
