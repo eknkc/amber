@@ -172,7 +172,13 @@ func MustCompileFile(filename string, options Options) *template.Template {
 // in all subdirectories. The key then is the path e.g: "layouts/layout"
 func CompileDir(dirname string, dopt DirOptions, opt Options) (map[string]*template.Template, error) {
 	dir, err := os.Open(dirname)
-	if err != nil {
+	if err != nil && opt.VirtualFilesystem != nil {
+		vdir, err := opt.VirtualFilesystem.Open(dirname)
+		if err != nil {
+			return nil, err
+		}
+		dir = vdir.(*os.File)
+	} else if err != nil {
 		return nil, err
 	}
 	defer dir.Close()
