@@ -103,6 +103,9 @@ var DefaultDirOptions = DirOptions{".amber", true}
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func Compile(input string, options Options) (*template.Template, error) {
 	comp := New()
+	if options == nil {
+		options = DefaultOptions
+	}
 	comp.Options = options
 
 	err := comp.Parse(input)
@@ -141,6 +144,9 @@ func MustCompile(input string, options Options) *template.Template {
 // Necessary runtime functions will be injected and the template will be ready to be executed.
 func CompileFile(filename string, options Options) (*template.Template, error) {
 	comp := New()
+	if options == nil {
+		options = DefaultOptions
+	}
 	comp.Options = options
 
 	err := comp.ParseFile(filename)
