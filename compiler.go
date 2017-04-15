@@ -789,6 +789,11 @@ func (c *Compiler) visitMixin(mixin *parser.Mixin) {
 
 func (c *Compiler) visitMixinCall(mixinCall *parser.MixinCall) {
 	mixin := c.mixins[mixinCall.Name]
+
+	if mixin == nil {
+		panic(fmt.Sprintf("unknown mixin %q", mixinCall.Name))
+	}
+
 	for i, arg := range mixin.Args {
 		c.write(fmt.Sprintf(`{{%s := %s}}`, arg, c.visitRawInterpolation(mixinCall.Args[i])))
 	}

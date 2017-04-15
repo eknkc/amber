@@ -85,6 +85,21 @@ func Test_Mixin_NameWithDashes(t *testing.T) {
 	}
 }
 
+func Test_Mixin_Unknown(t *testing.T) {
+	_, err := run(`
+		mixin foo($a)
+			p #{$a}
+
+		+bar(1)`, nil)
+
+	expected := `unknown mixin "bar"`
+	if err == nil {
+		t.Fatalf(`Expected {unkown mixin "bar"} error.`)
+	} else if !strings.Contains(err.Error(), expected) {
+		t.Fatalf("Error {%s} does not contains {%s}.", err.Error(), expected)
+	}
+}
+
 func Test_ClassName(t *testing.T) {
 	res, err := run(`div.test
 						p.test1.test2
