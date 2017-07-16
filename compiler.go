@@ -10,6 +10,7 @@ import (
 	gt "go/token"
 	"html/template"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -83,6 +84,10 @@ type Options struct {
 	// In this form, Amber emits line number comments in the output template. It is usable in debugging environments.
 	// Default: false
 	LineNumbers bool
+	// Setting the virtual filesystem to use
+	// If set, will attempt to use a virtual filesystem provided instead of os.
+	// Default: nil
+	VirtualFilesystem http.FileSystem
 }
 
 // DirOptions is used to provide options to directory compilation.
@@ -94,7 +99,7 @@ type DirOptions struct {
 }
 
 // DefaultOptions sets pretty-printing to true and line numbering to false.
-var DefaultOptions = Options{true, false}
+var DefaultOptions = Options{true, false, nil}
 
 // DefaultDirOptions sets expected file extension to ".amber" and recursive search for templates within a directory to true.
 var DefaultDirOptions = DirOptions{".amber", true}
@@ -167,7 +172,13 @@ func MustCompileFile(filename string, options Options) *template.Template {
 // in all subdirectories. The key then is the path e.g: "layouts/layout"
 func CompileDir(dirname string, dopt DirOptions, opt Options) (map[string]*template.Template, error) {
 	dir, err := os.Open(dirname)
-	if err != nil {
+	if err != nil && opt.VirtualFilesystem != nil {
+		vdir, err := opt.VirtualFilesystem.Open(dirname)
+		if err != nil {
+			return nil, err
+		}
+		dir = vdir.(*os.File)
+	} else if err != nil {
 		return nil, err
 	}
 	defer dir.Close()
@@ -249,6 +260,9 @@ func (c *Compiler) ParseData(input []byte, filename string) (err error) {
 
 	parser, err := parser.ByteParser(input)
 	parser.SetFilename(filename)
+	if c.VirtualFilesystem != nil {
+		parser.SetVirtualFilesystem(c.VirtualFilesystem)
+	}
 
 	if err != nil {
 		return
@@ -266,13 +280,15 @@ func (c *Compiler) ParseFile(filename string) (err error) {
 		}
 	}()
 
-	parser, err := parser.FileParser(filename)
-
+	p, err := parser.FileParser(filename)
+	if err != nil && c.VirtualFilesystem != nil {
+		p, err = parser.VirtualFileParser(filename, c.VirtualFilesystem)
+	}
 	if err != nil {
 		return
 	}
 
-	c.node = parser.Parse()
+	c.node = p.Parse()
 	c.filename = filename
 	return
 }
