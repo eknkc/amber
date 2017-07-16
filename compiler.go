@@ -35,6 +35,10 @@ var builtinFunctions = [...]string{
 	"unescaped",
 }
 
+const (
+	dollar = "__DOLLAR__"
+)
+
 // Compiler is the main interface of Amber Template Engine.
 // In order to use an Amber template, it is required to create a Compiler and
 // compile an Amber source to native Go template.
@@ -609,12 +613,12 @@ func (c *Compiler) visitRawInterpolation(value string) string {
 		value = "\"\""
 	}
 
-	value = strings.Replace(value, "$", "__DOLLAR__", -1)
+	value = strings.Replace(value, "$", dollar, -1)
 	expr, err := gp.ParseExpr(value)
 	if err != nil {
 		panic("Unable to parse expression.")
 	}
-	value = strings.Replace(c.visitExpression(expr), "__DOLLAR__", "$", -1)
+	value = strings.Replace(c.visitExpression(expr), dollar, "$", -1)
 	return value
 }
 
@@ -634,10 +638,10 @@ func (c *Compiler) visitExpression(outerexpr ast.Expr) string {
 	var exec func(ast.Expr)
 
 	exec = func(expr ast.Expr) {
-		switch expr.(type) {
+		switch expr := expr.(type) {
 		case *ast.BinaryExpr:
 			{
-				be := expr.(*ast.BinaryExpr)
+				be := expr
 
 				exec(be.Y)
 				exec(be.X)
@@ -692,7 +696,7 @@ func (c *Compiler) visitExpression(outerexpr ast.Expr) string {
 			}
 		case *ast.UnaryExpr:
 			{
-				ue := expr.(*ast.UnaryExpr)
+				ue := expr
 
 				exec(ue.X)
 
@@ -714,22 +718,22 @@ func (c *Compiler) visitExpression(outerexpr ast.Expr) string {
 				stack.PushFront(name)
 			}
 		case *ast.ParenExpr:
-			exec(expr.(*ast.ParenExpr).X)
+			exec(expr.X)
 		case *ast.BasicLit:
-			stack.PushFront(expr.(*ast.BasicLit).Value)
+			stack.PushFront(strings.Replace(expr.Value, dollar, "$", -1))
 		case *ast.Ident:
-			name := expr.(*ast.Ident).Name
-			if len(name) >= len("__DOLLAR__") && name[:len("__DOLLAR__")] == "__DOLLAR__" {
-				if name == "__DOLLAR__" {
+			name := expr.Name
+			if len(name) >= len(dollar) && name[:len(dollar)] == dollar {
+				if name == dollar {
 					stack.PushFront(`.`)
 				} else {
-					stack.PushFront(`$` + expr.(*ast.Ident).Name[len("__DOLLAR__"):])
+					stack.PushFront(`$` + expr.Name[len(dollar):])
 				}
 			} else {
-				stack.PushFront(`.` + expr.(*ast.Ident).Name)
+				stack.PushFront(`.` + expr.Name)
 			}
 		case *ast.SelectorExpr:
-			se := expr.(*ast.SelectorExpr)
+			se := expr
 			exec(se.X)
 			x := pop()
 
@@ -741,7 +745,7 @@ func (c *Compiler) visitExpression(outerexpr ast.Expr) string {
 			c.write(`{{` + name + ` := ` + x + `.` + se.Sel.Name + `}}`)
 			stack.PushFront(name)
 		case *ast.CallExpr:
-			ce := expr.(*ast.CallExpr)
+			ce := expr
 
 			for i := len(ce.Args) - 1; i >= 0; i-- {
 				exec(ce.Args[i])
