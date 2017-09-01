@@ -418,7 +418,7 @@ type Options struct {
 	// If disabled, produced HTML is compact. This might be more suitable in production environments.
 	// Defaukt: true
 	PrettyPrint bool
-	// Setting if line number emiting is enabled
+	// Setting if line number emitting is enabled
 	// In this form, Amber emits line number comments in the output template. It is usable in debugging environments.
 	// Default: false
 	LineNumbers bool
