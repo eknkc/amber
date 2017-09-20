@@ -319,6 +319,17 @@ func Test_Dollar_In_TagAttributes(t *testing.T) {
 	}
 }
 
+func Test_ConditionEvaluation(t *testing.T) {
+	res, err := run(`input
+		[value=row.Value] ? row`, nil)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<input placeholder="$ per kWh" />`, t)
+	}
+}
+
 func Failing_Test_CompileDir(t *testing.T) {
 	tmpl, err := CompileDir("samples/", DefaultDirOptions, DefaultOptions)
 
@@ -429,4 +440,12 @@ func run(tpl string, data interface{}) (string, error) {
 		return "", err
 	}
 	return strings.TrimSpace(buf.String()), nil
+}
+
+func generate(tpl string) (string, error) {
+	c := New()
+	if err := c.ParseData([]byte(tpl), "test.amber"); err != nil {
+		return "", err
+	}
+	return c.CompileString()
 }

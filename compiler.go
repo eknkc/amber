@@ -490,45 +490,50 @@ func (c *Compiler) visitAssignment(assgn *parser.Assignment) {
 func (c *Compiler) visitTag(tag *parser.Tag) {
 	type attrib struct {
 		name      string
-		value     string
+		value     func() string
 		condition string
 	}
 
 	attribs := make(map[string]*attrib)
 
 	for _, item := range tag.Attributes {
+		attritem := item
 		attr := new(attrib)
 		attr.name = item.Name
 
-		if !item.IsRaw {
-			attr.value = c.visitInterpolation(item.Value)
-		} else if item.Value == "" {
-			attr.value = ""
-		} else {
-			attr.value = item.Value
+		attr.value = func() string {
+			if !attritem.IsRaw {
+				return c.visitInterpolation(attritem.Value)
+			} else if attritem.Value == "" {
+				return ""
+			} else {
+				return attritem.Value
+			}
 		}
 
-		if len(item.Condition) != 0 {
-			attr.condition = c.visitRawInterpolation(item.Condition)
+		if len(attritem.Condition) != 0 {
+			attr.condition = c.visitRawInterpolation(attritem.Condition)
 		}
 
 		if attr.name == "class" && attribs["class"] != nil {
 			prevclass := attribs["class"]
-			attr.value = ` ` + attr.value
+			prevvalue := prevclass.value
 
-			if len(attr.condition) > 0 {
-				attr.value = `{{if ` + attr.condition + `}}` + attr.value + `{{end}}`
-				attr.condition = ""
+			prevclass.value = func() string {
+				aval := attr.value()
+
+				if len(attr.condition) > 0 {
+					aval = `{{if ` + attr.condition + `}}` + aval + `{{end}}`
+				}
+
+				if len(prevclass.condition) > 0 {
+					return `{{if ` + prevclass.condition + `}}` + prevvalue() + `{{end}} ` + aval
+				}
+
+				return prevvalue() + " " + aval
 			}
-
-			if len(prevclass.condition) > 0 {
-				prevclass.value = `{{if ` + prevclass.condition + `}}` + prevclass.value + `{{end}}`
-				prevclass.condition = ""
-			}
-
-			prevclass.value = prevclass.value + attr.value
 		} else {
-			attribs[item.Name] = attr
+			attribs[attritem.Name] = attr
 		}
 	}
 
@@ -548,10 +553,12 @@ func (c *Compiler) visitTag(tag *parser.Tag) {
 			c.write(`{{if ` + value.condition + `}}`)
 		}
 
-		if value.value == "" {
+		val := value.value()
+
+		if val == "" {
 			c.write(` ` + name)
 		} else {
-			c.write(` ` + name + `="` + value.value + `"`)
+			c.write(` ` + name + `="` + val + `"`)
 		}
 
 		if len(value.condition) > 0 {
