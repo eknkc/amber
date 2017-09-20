@@ -326,7 +326,16 @@ func Test_ConditionEvaluation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	} else {
-		expect(res, `<input placeholder="$ per kWh" />`, t)
+		expect(res, `<input />`, t)
+	}
+
+	res, err = run(`input
+		[value="test"] ? !row`, nil)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<input value="test" />`, t)
 	}
 }
 
