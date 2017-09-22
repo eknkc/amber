@@ -166,6 +166,16 @@ func Test_Attribute(t *testing.T) {
 	}
 }
 
+func Test_MultipleClasses(t *testing.T) {
+	res, err := run(`div.test1.test2[class="test3"][class="test4"]`, nil)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<div class="test1 test2 test3 test4"></div>`, t)
+	}
+}
+
 func Test_EmptyAttribute(t *testing.T) {
 	res, err := run(`div[name]`, nil)
 
@@ -319,6 +329,28 @@ func Test_Dollar_In_TagAttributes(t *testing.T) {
 	}
 }
 
+func Test_ConditionEvaluation(t *testing.T) {
+	res, err := run(`input
+		[value=row.Value] ? row`, map[string]interface{}{
+		"row": nil,
+	})
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<input />`, t)
+	}
+
+	res, err = run(`input
+		[value="test"] ? !row`, nil)
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<input value="test" />`, t)
+	}
+}
+
 func Failing_Test_CompileDir(t *testing.T) {
 	tmpl, err := CompileDir("samples/", DefaultDirOptions, DefaultOptions)
 
@@ -429,4 +461,12 @@ func run(tpl string, data interface{}) (string, error) {
 		return "", err
 	}
 	return strings.TrimSpace(buf.String()), nil
+}
+
+func generate(tpl string) (string, error) {
+	c := New()
+	if err := c.ParseData([]byte(tpl), "test.amber"); err != nil {
+		return "", err
+	}
+	return c.CompileString()
 }
