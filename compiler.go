@@ -529,7 +529,10 @@ func (c *Compiler) visitTag(tag *parser.Tag) {
 					aval = `{{if ` + attr.condition + `}}` + aval + `{{end}}`
 				}
 
-				return prevvalue + " " + aval
+                if attr.name == "class" {
+                    return prevvalue + " " + aval
+                }
+				return prevvalue + aval
 			}
 
             // If either the current or the new attribute does not have a condition, there will always have something to display

@@ -145,7 +145,7 @@ func Test_ClassName(t *testing.T) {
 
 func Test_Id(t *testing.T) {
 	res, err := run(`div#test
-						p#test1#test2`, nil)
+						p#test2`, nil)
 
 	if err != nil {
 		t.Fatal(err.Error())
@@ -348,6 +348,56 @@ func Test_ConditionEvaluation(t *testing.T) {
 		t.Fatal(err.Error())
 	} else {
 		expect(res, `<input value="test" />`, t)
+	}
+}
+
+func Test_Multiple_Attributes_Condition(t *testing.T) {
+    tmpl := `input
+		[value="foo"] ? row == 10
+		[value="bar"] ? row == 20`
+
+	res, err := run(tmpl, map[string]interface{}{
+        "row": 10,
+    })
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<input value="foo" />`, t)
+	}
+
+	res, err = run(tmpl, map[string]interface{}{
+        "row": 20,
+    })
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<input value="bar" />`, t)
+	}
+
+	res, err = run(tmpl, map[string]interface{}{
+        "row": 30,
+    })
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<input />`, t)
+	}
+
+    tmpl = `input
+		[value="foo"] ? row >= 10
+		[value="bar"] ? row >= 20`
+
+	res, err = run(tmpl, map[string]interface{}{
+        "row": 30,
+    })
+
+	if err != nil {
+		t.Fatal(err.Error())
+	} else {
+		expect(res, `<input value="foobar" />`, t)
 	}
 }
 
