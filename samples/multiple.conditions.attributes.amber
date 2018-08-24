@@ -1,0 +1,4 @@
+$var_1 = 10
+div
+    [foo="bar"] ? $var_1 > 10
+    [foo="zaz"] ? $var_1 > 20

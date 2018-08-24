@@ -515,26 +515,39 @@ func (c *Compiler) visitTag(tag *parser.Tag) {
 			attr.condition = c.visitRawInterpolation(attritem.Condition)
 		}
 
-		if attr.name == "class" && attribs["class"] != nil {
-			prevclass := attribs["class"]
-			prevvalue := prevclass.value
+        // Check if the attribute is known
+        if prevattr, contains := attribs[attr.name]; contains {
+            prevvalue := prevattr.value()
+            if len(prevattr.condition) > 0 {
+                prevvalue = `{{if ` + prevattr.condition + `}}` + prevvalue + `{{end}}`
+            }
 
-			prevclass.value = func() string {
+			prevattr.value = func() string {
 				aval := attr.value()
 
 				if len(attr.condition) > 0 {
 					aval = `{{if ` + attr.condition + `}}` + aval + `{{end}}`
 				}
 
-				if len(prevclass.condition) > 0 {
-					return `{{if ` + prevclass.condition + `}}` + prevvalue() + `{{end}} ` + aval
-				}
-
-				return prevvalue() + " " + aval
+                if attr.name == "class" {
+                    return prevvalue + " " + aval
+                }
+				return prevvalue + aval
 			}
-		} else {
-			attribs[attritem.Name] = attr
-		}
+
+            // If either the current or the new attribute does not have a condition, there will always have something to display
+            // Therefore remove the condition on everything
+            if len(attr.condition) == 0 || len(prevattr.condition) == 0 {
+                prevattr.condition = ""
+            } else {
+                if !strings.HasPrefix(prevattr.condition, "or ") {
+                    prevattr.condition = `or ` + prevattr.condition
+                }
+                prevattr.condition = prevattr.condition + ` ` + attr.condition
+            }
+        } else {
+            attribs[attr.name] = attr
+        }
 	}
 
 	keys := make([]string, 0, len(attribs))
